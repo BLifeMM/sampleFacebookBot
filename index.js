@@ -5,7 +5,7 @@ const
   express = require('express'),
   body_parser = require('body-parser'),
   app = express(),
-  PAGE_ACCESS_TOKEN = process.env.PAGE_ACCESS_TOKEN || "EAAFYRyzpU1IBAMg0ZCx5bl7a0dFJkLwVT3fz4hfoAsIR44jdh7Qy64OCauhLzZCsm2JZCAXqtemq3Nm6PtvgxOaumRmpeRNIRVhx6UEK847ZA0q1sOxjZB60CSSSLy52RlxHIo4rvHzgKSgkjYkN4ZAvfqKAzPOItZCfZANyr341YHymuzrXRDilF6ZCAWiQ0INsZD",
+  PAGE_ACCESS_TOKEN = process.env.PAGE_ACCESS_TOKEN || "EAAEUIdBwrdQBACITxGSGgG6qGa0MfX2ZBCZCqxMTgERA0jeZC7u9GAt77Vw4ZCZB7ddJebZCj5C0c4uNw7ts2x7iUavMdcRW9uRqW4w2DXL75bNT47WP2YbZB1WQZAdHLecMs6Ko39bxoURWoZA44aUAh9YXuqepsa7UJ7iTA9BHTGDKYlwOUUyMWZAhONcGiWas4ZD", // amm testing page
   VERIFY_TOKEN =  process.env.VERIFY_TOKEN ||"verify me", // passcode for webhook verify
   port = process.env.PORT || 3000;
   
@@ -43,14 +43,14 @@ app.get("/webhook", (req, res) => {
 
 app.post("/webhook", (req, res) => {    
     const webhook_events = req.body.entry[0];    // parse messaging array
-    console.log(webhook_events)     // Bot is in control - listen for messages  
+    console.log("webhook_events messaging:", webhook_events.messaging)     // Bot is in control - listen for messages  
     if (webhook_events.messaging) {
         // iterate webhook events
         webhook_events.messaging.forEach(event => {
           var sender_psid = event.sender.id;
           if (event.postback) {
             handlePostback(sender_psid, event.postback);
-          }else if(event.pass_thread_control){
+          } else if(event.pass_thread_control){
             console.log('move to doen mess');
             let response = {
               "text": "လူကြီးမင်းကို messenger bot ရဲ့အလိုအလျှောက်တုံ့ပြန်မှု့စနစ်ထဲသို့ လွှဲပြောင်းလိုက်ပြီ ဖြစ်၍ ပြန်လည်စတင်ရန် ကိုနှိပ်ပါ။",
@@ -86,28 +86,29 @@ app.post("/webhook", (req, res) => {
 Function to Handle when user send message to bot
 ***********************************************/
 // Function to handle when user click button
-function handlePostback(sender_psid, postback) {
+function handlePostback(sender_psid, received_postback) {
   let payload = received_postback.payload;
   console.log("payload type:", payload);
   switch(payload){
       case 'back':
-          doSomething(sender_psid);
+          quickReply(sender_psid);
           break
       case 'next':
-          doSomething(sender_psid);
+          welcome(sender_psid);
           break    
       case 'home':
-          doSomething(sender_psid);
+          quickReply(sender_psid);
           break;           
   }
 }
 // Function to handle when user input or text
 function handleMessage(sender_psid, received_message) {
     let user_message = received_message.text;       
-    console.log("user_message:", user_message)
-    switch(user_message){
+    console.log("received_message:", user_message)
+    if(user_message){
+      switch(user_message){
         case 'Hi':
-            doSomething(sender_psid);
+            welcome(sender_psid);
             break
         case 'quick reply':
             doSomething(sender_psid);
@@ -118,50 +119,202 @@ function handleMessage(sender_psid, received_message) {
         default:
             unknownCommand(sender_psid);
             break            
-    }
-  
-    if(user_message){
-        doSomething(sender_psid);
+      }
     }else {      
         unknownCommand(sender_psid);
     } 
 }
 // Function to handle when user click on quick reply button
-function handleQuickReply(sender_psid) {
-    let response = {
-      "text": `Please choose a quick reply`,
-      "quick_replies": [
-        {
-          "content_type": "text",
-          "title": "Talk with bot👉",
-          "payload": "talktoagent"
-        },
-        {
-          "content_type": "text",
-          "title": "👈 Call center(1)👉",
-          "payload": "phone1",
-        },
-        {
-          "content_type": "text",
-          "title": "👈 Call center(2)👉",
-          "payload": "phone2",
-        },
-        {
-          "content_type": "text",
-          "title": "👈 Call center(3)",
-          "payload": "phone3",
-        }
-      ]
-    }
-    callSend(sender_psid, response);
+function handleQuickReply(sender_psid, received_quickreply) {
+  console.log("qick reply:",received_quickreply.quick_reply.payload);
+  let qickreply = received_quickreply.quick_reply.payload;
+  switch (qickreply) {
+    case "yes":
+      carouosel(sender_psid)
+      break;
+    case 'no':
+      welcome(sender_psid)
+      break;
+    default:
+      unknownCommand(sender_psid);
+      break
+  }
 }
 
 
 /************************************
   Function to reponse for the message
 *************************************/
+function welcome(sender_psid) {
+  let text = 'Welcome,'; 
+  // response type 1 -> button template
+  let response1 =  {
+    "attachment": {
+      "type": "template",
+      "payload": {
+        "template_type": "button",
+        "text": "It is the template 'button' response.",
+        "buttons": [
+          {
+            "type": "web_url",
+            "title": "Go to link",              
+            "url": `https://www.facebook.com/blife.mm`,
+            "title": "BLife Facebook Page",
+            "webview_height_ratio": "tall"
+          },
+          {
+            "type": "postback",
+            "title": "Home to quick reply",
+            "payload": "home"
+          }
+          ,
+          {
+            "type": "postback",
+            "title": "Back to default",
+            "payload": "back"
+          }
+        ]
+      }
+    }
+  }
+  // response type 2 -> quick_reply
+  let response2 =  {
+    "text": "It is the 'quick_reply' response.",
+    "quick_replies": [
+      {
+        "content_type": "text",
+        "title": "👉Test1 Yes",
+        "payload": "yes"
+      }, {
+        "content_type": "text",
+        "title": "👉Test2 No",
+        "payload": "no",
+      }      
+    ]
+  }
+   // response type 2 -> generic template
+  let response3 = {
+    "attachment": {
+      "type": "template",
+      "payload": {
+        "template_type": "generic",
+        "elements": [
+          {
+            "title": "It is the templaet 'generic' response Title. Also called carousel.",
+            "subtitle": `It is the templaet 'generic' response sub-title.`,
+            "image_url": `http://blife.blifemm.com/img/icon/abt.png`,
+            "buttons": [            
+              {
+                "type": "postback",
+                "title": "Post back 1",
+                "payload": "pstback1",
+              },
+              {
+                "type": "postback",
+                "title": "Post back 2",
+                "payload": "pstback2",
+              }
+            ]
+            
+          },
+          {
+            "title": "It is the templaet 'generic' response Title. Also called carousel2.",
+            "subtitle": `It is the templaet 'generic' response sub-title.`,
+            "image_url": `http://blife.blifemm.com/img/icon/abt.png`,
+            "buttons": [            
+              {
+                "type": "postback",
+                "title": "Post back 1",
+                "payload": "fasttopup",
+              },
+              {
+                "type": "postback",
+                "title": "Post back 2",
+                "payload": "onechoice",
+              }
+            ]
+            
+          },
+        ]
+      }
+    }
+  }
+  callSend(sender_psid, response1)
+}
+
+function quickReply(sender_psid) {
+  let text = 'You just click a button.';
+  let response =  {
+    "text": "It is the 'quick_reply' response.",
+    "quick_replies": [
+      {
+        "content_type": "text",
+        "title": "Yes to carousel",
+        "payload": "yes"
+      }, {
+        "content_type": "text",
+        "title": "No to template button",
+        "payload": "no",
+      }      
+    ]
+  }
+  callSend(sender_psid, response);
+}
+
+function carouosel(sender_psid) {
+  let text = 'You just click a button.';
+    // response type 2 -> generic template
+    let response = {
+      "attachment": {
+        "type": "template",
+        "payload": {
+          "template_type": "generic",
+          "elements": [
+            {
+              "title": "It is the templaet 'generic' response Title. Also called carousel.",
+              "subtitle": `It is the templaet 'generic' response sub-title.`,
+              "image_url": `http://blife.blifemm.com/img/icon/abt.png`,
+              "buttons": [            
+                {
+                  "type": "postback",
+                  "title": "To Button Template",
+                  "payload": "next",
+                },
+                {
+                  "type": "postback",
+                  "title": "To quick Reply",
+                  "payload": "back",
+                }
+              ]
+              
+            },
+            {
+              "title": "It is the templaet 'generic' response Title. Also called carousel2.",
+              "subtitle": `It is the templaet 'generic' response sub-title.`,
+              "image_url": `http://blife.blifemm.com/img/icon/abt.png`,
+              "buttons": [            
+                {
+                  "type": "postback",
+                  "title": "Post back 1",
+                  "payload": "fasttopup",
+                },
+                {
+                  "type": "postback",
+                  "title": "Post back 2",
+                  "payload": "onechoice",
+                }
+              ]
+              
+            },
+          ]
+        }
+      }
+    }
+  callSend(sender_psid, response);
+}
+
 function doSomething(sender_psid) {
-    let text = '☎ဖုန်းခေါ်ရန်သေချာပါရဲ့လား? သေချာရင်"ခေါ် ဆိုမည်"ကိုနှိပ်ပါ';
+    let text = 'You just click a button.';
     let response = {
       "attachment": {
         "type": "template",
@@ -170,9 +323,9 @@ function doSomething(sender_psid) {
           "text": text,
           "buttons": [
             {
-              "type": "phone_number",
-              "title": "✆ ခေါ် ဆိုမည်",
-              "payload": "959897879771"
+              "type": "postback",
+              "title": "to welcome",
+              "payload": "home"
             }
           ]
         }
