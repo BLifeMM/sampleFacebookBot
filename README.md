@@ -1,4 +1,30 @@
 ﻿# sampleFacebookBot
+
+
+## How to run?
+
+Simple facebook-bot, with code and instruction for getting start.
+
+       Clone https://github.com/BLifeMM/sampleFacebookBot and navigate to the ‘sampleFaceBookBot’ folder.
+
+       If you have own Facebook app and Facebook page, change PAGE_ACCESS_TOKEN and VERIFY_TOKEN value. 
+
+**Run**
+> npm install
+> Run ngrok with the same port for localhost which will run the viber from express, server listener
+change the serverURL from the 'app.js' with ngrok webhook
+> Run the localhost/express server with 'node app.js' or 'npm start'
+  The local deployment is success. The brief of the code is explained in the index.js. Please follow the steps. 
+> update the facebook app's webhook subscribution callbackURL with ngrok server url and insert the token for verification.
+  The webhook ‘Get’ method end point ‘/’, is the CallbackURL which is used to verify the server is https and ensure it is working by the Facebook app and webhook VERIFY_TOKEN is used to verify the server is correct.
+
+**Note**
+If a facebook messenger bot deployement is not success,
+1. check if not exist, add a script from package.json -> 
+                                "start" : "node app.js"
+2. check the mail file from package.json -> "start" : "node app.js" is correct
+
+
 ## Library Prerequisites
 1. Node >= 5.0.0 (Express framework)
 2. An Active Facebook App from Facebook developer,  a page access token. To create account here.
@@ -36,32 +62,8 @@ After you’ve configured your webhook, you’ll need to subscribe to the specif
 
 Once you’ve gotten your Page Access Token and set up your webhook, make sure you set both the PAGE_ACCESS_TOKEN and VERIFY_TOKEN config values in your application, and you should be good to go!
 
-
-## How to run?
-
-Simple facebook-bot, with code and instruction for getting start.
-
-       Clone https://github.com/BLifeMM/sampleFacebookBot and navigate to the ‘sampleFaceBookBot’ folder.
-
-       If you have own Facebook app and Facebook page, change PAGE_ACCESS_TOKEN and VERIFY_TOKEN value. 
-
-**Run**
-➢ npm install
-➢ npm start
-
-       The local deployment is success. The brief of the code is explained in the index.js. Please follow the steps. 
-
-
-       The webhook ‘Get’ method end point ‘/’, is the CalbackURL which is used to verify the server is https and ensure it is working by the Facebook app and webhook VERIFY_TOKEN is used to verify the server is correct.
-
-
-
-
-
-
 ## How we track the request, response?
        The userInput may come from the message templates, each designed to support a different, common message structure, including lists, receipts, buttons, and more from the ‘response’. For complete details, see Templates. Genernally, the userInput can be divided into three postback, pass_thread_control and message based on the json reply from the webhook listening.
-
 
 
 
